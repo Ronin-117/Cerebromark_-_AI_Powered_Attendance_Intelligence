@@ -3,12 +3,12 @@ import cv2
 import numpy as np
 import insightface
 import warnings
-from tqdm import tqdm # A library for nice progress bars
+from tqdm import tqdm 
 
 # --- Configuration ---
 # 1. SET YOUR INPUT AND OUTPUT FOLDERS HERE
-INPUT_DATA_DIR = "NDB2"  # <-- IMPORTANT: CHANGE THIS
-OUTPUT_DB_DIR = "New_face_db2"
+INPUT_DATA_DIR = "NDB"
+OUTPUT_DB_DIR = "New_face_db"
 
 # 2. CHOOSE YOUR EXECUTION PROVIDER ('CPU' or 'CUDA')
 # Use 'CUDAExecutionProvider' if you have a compatible NVIDIA GPU and CUDA installed.
@@ -111,6 +111,4 @@ def main():
 
 # --- Main Execution Guard ---
 if __name__ == "__main__":
-    # Before running, make sure you have tqdm installed:
-    # pip install tqdm
     main()

@@ -1,0 +1,10 @@
+flask
+opencv-python
+csv
+numpy
+apscheduler
+hikvisionapi
+insightface
+tqdm
+Cython
+cmake
