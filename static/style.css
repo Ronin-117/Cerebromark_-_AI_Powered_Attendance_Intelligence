@@ -1,0 +1,194 @@
+/* ===================================================================
+   STYLE.CSS - AURORA GLASS THEME
+   Description: A premium, interactive glassmorphism theme.
+   =================================================================== */
+
+/* -------------------------------------------------------------------
+   1. Root Variables & Font Imports
+   ------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+    --gold-primary: #D4AF37;
+    --gold-secondary: #B8860B;
+    --text-light: #f5f5f5;
+    --status-active: #00ff7f; /* Spring Green */
+    --status-idle: #ff4757;   /* Modern Red */
+}
+
+/* -------------------------------------------------------------------
+   2. Keyframe Animations
+   ------------------------------------------------------------------- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        text-shadow: 0 0 5px var(--status-active), 0 0 10px var(--status-active);
+    }
+    50% {
+        text-shadow: 0 0 10px var(--status-active), 0 0 20px var(--status-active);
+    }
+}
+
+/* -------------------------------------------------------------------
+   3. Body, Background Video & Overlay
+   ------------------------------------------------------------------- */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    color: var(--text-light);
+    background-color: #0c0a18; /* Fallback background */
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#background-video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: -2;
+    transform: translateX(-50%) translateY(-50%);
+    object-fit: cover;
+    filter: brightness(0.5) saturate(1.1);
+}
+
+.video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(170deg, rgba(12, 10, 24, 0.5) 0%, rgba(50, 15, 30, 0.7) 100%);
+    z-index: -1;
+}
+
+/* -------------------------------------------------------------------
+   4. Main Layout & Content Wrapper
+   ------------------------------------------------------------------- */
+.content-wrapper {
+    animation: fadeInUp 1s ease-out forwards;
+}
+
+.container {
+    width: 90%;
+    max-width: 1300px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* -------------------------------------------------------------------
+   5. The "Aurora Glass" Panel Style
+   ------------------------------------------------------------------- */
+.glass-panel {
+    position: relative; /* Required for the pseudo-element light effect */
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    border-radius: 25px;
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    padding: 25px 35px;
+    margin-bottom: 35px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    overflow: hidden; /* Hides the light effect when it goes outside the panel */
+}
+
+/* The interactive light effect, positioned using JS-updated CSS variables */
+.glass-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        350px circle at var(--mouse-x) var(--mouse-y),
+        rgba(212, 175, 55, 0.25), /* The golden light */
+        transparent 80%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    z-index: -1;
+}
+
+.glass-panel:hover::before {
+    opacity: 1; /* Reveal the light on hover */
+}
+
+/* -------------------------------------------------------------------
+   6. Header, Status, and Video Feed
+   ------------------------------------------------------------------- */
+header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 2px;
+    background: linear-gradient(45deg, #FFDF7D, #D4AF37, #B8860B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid;
+    border-image: linear-gradient(to right, transparent, var(--gold-primary), transparent) 1;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+
+#clock { font-size: 1.2rem; text-align: center; font-weight: 300; opacity: 0.8; margin-top: -20px; }
+#status-panel { display: flex; justify-content: space-around; align-items: center; text-align: center; }
+#system-status-text { font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: color 0.5s ease; }
+.status-active-glow { animation: pulseGlow 2s infinite ease-in-out; }
+#video-container h3 { text-align: center; font-weight: 600; font-size: 1.5rem; color: var(--gold-primary); }
+#video-feed { width: 100%; height: auto; max-width: 800px; display: block; margin: 0 auto; border-radius: 15px; border: 2px solid; border-image: linear-gradient(45deg, var(--gold-secondary), var(--gold-primary)) 1; box-shadow: 0 0 25px rgba(212, 175, 55, 0.4); }
+
+/* -------------------------------------------------------------------
+   7. Tables (Live and Historical)
+   ------------------------------------------------------------------- */
+.table-container { max-height: 400px; overflow-y: auto; border-radius: 10px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; }
+th, td { text-align: center; padding: 16px 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+th { background: rgba(212, 175, 55, 0.2); backdrop-filter: blur(10px); color: var(--text-light); font-weight: 600; text-transform: uppercase; position: sticky; top: 0; z-index: 10; }
+tr:hover td { background-color: rgba(212, 175, 55, 0.15); }
+.status-present td { font-weight: 600; color: #c8ffc8; }
+.table-container::-webkit-scrollbar { width: 8px; }
+.table-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+.table-container::-webkit-scrollbar-thumb { background: var(--gold-secondary); border-radius: 10px; }
+
+/* -------------------------------------------------------------------
+   8. Sidebar & Toggle Button
+   ------------------------------------------------------------------- */
+#sidebar { position: fixed; top: 0; right: -420px; width: 400px; height: 100%; z-index: 1000; padding: 20px; display: flex; flex-direction: column; gap: 20px; transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1); margin-bottom: 0; }
+.sidebar-title { text-align: center; color: var(--gold-primary); margin: 0; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.4); }
+.sidebar-controls { display: flex; flex-direction: column; gap: 15px; }
+.sidebar-controls label { font-weight: 600; opacity: 0.9; }
+.sidebar-controls input[type="date"], .sidebar-controls select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.5); background-color: rgba(0,0,0,0.3); color: var(--text-light); font-family: 'Poppins', sans-serif; font-size: 1rem; color-scheme: dark; }
+#past-attendance-table { flex-grow: 1; overflow: hidden; padding: 0; }
+#past-attendance-table .table-container { max-height: 100%; }
+#sidebar-toggle { position: fixed; top: 20px; right: 20px; z-index: 1001; width: 50px; height: 50px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.4s ease; }
+#sidebar-toggle svg { width: 24px; height: 24px; color: var(--text-light); transition: transform 0.4s ease; }
+#sidebar-toggle:hover { background: rgba(212, 175, 55, 0.3); transform: scale(1.1); }
+#sidebar-toggle.active svg { transform: rotate(90deg); }
+body.sidebar-open #sidebar { right: 0; }
+body.sidebar-open main.content-wrapper { transition: margin-right 0.5s cubic-bezier(0.77, 0, 0.175, 1); margin-right: 420px; }
+
+/* -------------------------------------------------------------------
+   9. Media Queries for Responsiveness
+   ------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    header h1 { font-size: 2.2rem; }
+    #status-panel { flex-direction: column; gap: 15px; }
+    body.sidebar-open main.content-wrapper { margin-right: 0; }
+    #sidebar { width: 90%; right: -100%; }
+    body.sidebar-open #sidebar { right: 0; }
+}

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Attendance Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <!-- Background Video and Overlay -->
+    <div class="video-overlay"></div>
+    <video id="background-video" autoplay loop muted poster="{{ url_for('static', filename='videos/poster.jpg') }}">
+        <source src="{{ url_for('static', filename='videos/background.mp4') }}" type="video/mp4">
+    </video>
+    
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebar-toggle" title="View Past Records">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg>
+    </button>
+
+    <!-- Main Content Container -->
+    <main class="content-wrapper">
+        <div class="container">
+            <header>
+                <h1>Automated Attendance Monitor</h1>
+                <div id="clock"></div>
+            </header>
+            <div id="status-panel" class="controls glass-panel">
+                <h2>System Status: <span id="system-status-text">IDLE</span></h2>
+                <h3>Current Period: <span id="current-period-text">N/A</span></h3>
+            </div>
+            <div id="video-container" class="glass-panel" style="display:none;">
+                <h3>Live Feed</h3>
+                <img id="video-feed" src="">
+            </div>
+            <div id="attendance-table" class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Register Number</th><th>Name</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr><td colspan="3">System is idle. Waiting for the next scheduled period to start.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Sidebar for Past Attendance -->
+    <aside id="sidebar" class="glass-panel">
+        <h2 class="sidebar-title">View Past Records</h2>
+        <div class="sidebar-controls">
+            <label for="date-picker">Select Date:</label>
+            <input type="date" id="date-picker">
+            <label for="period-select">Select Period:</label>
+            <select id="period-select">
+                <option value="" disabled selected>Period</option>
+                <option value="1">1</option> <option value="2">2</option> <option value="3">3</option>
+                <option value="4">4</option> <option value="5">5</option> <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+        </div>
+        <div id="past-attendance-table" class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Register Number</th><th>Name</th><th>Status</th></tr>
+                </thead>
+                <tbody id="past-table-body">
+                    <tr><td colspan="3">Select a date and period to view records.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </aside>
+
+    <script>
+        // --- Document Ready Function ---
+        $(document).ready(function() {
+            // --- Live System Status Polling ---
+            setInterval(checkSystemStatus, 5000);
+            checkSystemStatus(); // Initial check
+
+            // --- Sidebar Toggle Logic ---
+            $('#sidebar-toggle').on('click', function() {
+                $('body').toggleClass('sidebar-open');
+                $(this).toggleClass('active');
+            });
+
+            // --- Historical Data Fetching ---
+            $('#date-picker, #period-select').on('change', fetchPastAttendance);
+            document.getElementById('date-picker').valueAsDate = new Date();
+            
+            // --- *** NEW: Aurora Light Effect *** ---
+            document.addEventListener('mousemove', function(e) {
+                document.querySelectorAll('.glass-panel').forEach(panel => {
+                    const rect = panel.getBoundingClientRect();
+                    const x = e.clientX - rect.left; // x position within the element.
+                    const y = e.clientY - rect.top;  // y position within the element.
+                    panel.style.setProperty('--mouse-x', `${x}px`);
+                    panel.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
+        });
+
+        // --- Clock Update Function ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = `Time: ${now.toLocaleTimeString()}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- Live Table Update Function ---
+        function updateLiveTable(data) {
+            const tableBody = $('#table-body');
+            tableBody.empty();
+            if (!data || data.length === 0) {
+                tableBody.append('<tr><td colspan="3">Session active. Waiting for students...</td></tr>');
+                return;
+            }
+            data.forEach(student => {
+                const row = `<tr class="status-present"><td>${student['Register Number']}</td><td>${student.Name}</td><td>${student.Status}</td></tr>`;
+                tableBody.append(row);
+            });
+        }
+
+        // --- System Status Check and UI Control ---
+        function checkSystemStatus() {
+            $.get('/get_system_status', function(status) {
+                const isRunning = status.is_running;
+                const statusTextElem = $('#system-status-text');
+
+                if (isRunning) {
+                    statusTextElem.text('ACTIVE').css('color', 'var(--status-active)').addClass('status-active-glow');
+                    $('#current-period-text').text(status.current_period);
+                    if ($('#video-container').is(':hidden')) {
+                        $('#video-container').slideDown(400);
+                        $('#video-feed').attr('src', '/video_feed?' + new Date().getTime());
+                    }
+                    updateLiveTable(status.attendance_data);
+                } else {
+                    statusTextElem.text('IDLE').css('color', 'var(--status-idle)').removeClass('status-active-glow');
+                    $('#current-period-text').text('N/A');
+                    if ($('#video-container').is(':visible')) {
+                        $('#video-container').slideUp(400);
+                        $('#video-feed').attr('src', '');
+                    }
+                    $('#table-body').html('<tr><td colspan="3">System is idle. Waiting for the next scheduled period to start.</td></tr>');
+                }
+            });
+        }
+
+        // --- Past Attendance Fetch Function ---
+        function fetchPastAttendance() {
+            const date = $('#date-picker').val();
+            const period = $('#period-select').val();
+            const tableBody = $('#past-table-body');
+
+            if (date && period) {
+                tableBody.html('<tr><td colspan="3">Loading...</td></tr>');
+                $.get(`/get_attendance_record?date=${date}&period=${period}`, function(data) {
+                    tableBody.empty();
+                    if (data && data.length > 0) {
+                        if (data[0].message) {
+                            tableBody.append(`<tr><td colspan="3">${data[0].message}</td></tr>`);
+                        } else {
+                            data.forEach(student => {
+                                const row = `<tr class="status-present"><td>${student['Register Number']}</td><td>${student.Name}</td><td>${student.Status}</td></tr>`;
+                                tableBody.append(row);
+                            });
+                        }
+                    } else {
+                        tableBody.append('<tr><td colspan="3">No record found for this date and period.</td></tr>');
+                    }
+                }).fail(function() {
+                    tableBody.html('<tr><td colspan="3">Error fetching data.</td></tr>');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
